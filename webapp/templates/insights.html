@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Visual Analytics & Model Performance Dashboard</h1>
+    <p class="page-subtitle">
+        Comprehensive exploratory data analysis and rigorous model benchmarking across 5 industry-standard Machine Learning algorithms.
+    </p>
+</div>
+
+<!-- Model Benchmark Table Card -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <h3 class="form-section-title"><i class="fa-solid fa-trophy"></i> Multi-Algorithm Benchmark Comparison Matrix</h3>
+    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
+        Models were evaluated using 80-20 stratified holdout testing. The best model was selected based on composite F1-Score & ROC-AUC score.
+    </p>
+
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Train Accuracy</th>
+                    <th>Test Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>ROC-AUC</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if metrics and metrics.all_models_comparison %}
+                    {% for name, row in metrics.all_models_comparison.items() %}
+                    <tr {% if name == metrics.best_model_name %}style="background: rgba(99, 102, 241, 0.12); border-left: 3px solid var(--accent-indigo);"{% endif %}>
+                        <td style="font-weight: 700; color: #fff;">
+                            {% if name == metrics.best_model_name %}
+                                <i class="fa-solid fa-crown" style="color: #fbbf24; margin-right: 0.35rem;"></i>
+                            {% endif %}
+                            {{ name }}
+                        </td>
+                        <td>{{ "%.2f"|format(row.train_accuracy * 100) }}%</td>
+                        <td style="font-weight: 700; color: var(--accent-blue);">{{ "%.2f"|format(row.test_accuracy * 100) }}%</td>
+                        <td>{{ "%.4f"|format(row.test_precision) }}</td>
+                        <td>{{ "%.4f"|format(row.test_recall) }}</td>
+                        <td style="font-weight: 700; color: var(--success);">{{ "%.4f"|format(row.test_f1) }}</td>
+                        <td style="font-weight: 700; color: var(--accent-purple);">{{ "%.4f"|format(row.test_roc_auc) }}</td>
+                        <td>
+                            {% if name == metrics.best_model_name %}
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">Best Model</span>
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.75rem;">Benchmarked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted);">No metrics data available yet. Please run the ML pipeline.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Model Evaluation Charts -->
+<h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="fa-solid fa-chart-pie" style="color: var(--accent-blue);"></i> Model Evaluation Visualizations
+</h2>
+
+<div class="grid-3" style="margin-bottom: 2.5rem;">
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Confusion Matrix</h4>
+        <img src="{{ url_for('static', filename='images/confusion_matrix.png') }}" alt="Confusion Matrix" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Pipeline+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Quantifies True Positives, True Negatives, False Positives & False Negatives.</p>
+    </div>
+
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">ROC-AUC Curve</h4>
+        <img src="{{ url_for('static', filename='images/roc_curve.png') }}" alt="ROC Curve" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+Pipeline+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Discriminative capability of the model across various decision thresholds.</p>
+    </div>
+
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Feature Importances</h4>
+        <img src="{{ url_for('static', filename='images/feature_importance.png') }}" alt="Feature Importance" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Feature+Importance'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Top predictors influencing customer churn probability.</p>
+    </div>
+</div>
+
+<!-- Exploratory Data Analysis (EDA) Section -->
+<h2 style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--warning);"></i> Exploratory Data Analysis (EDA) Insights
+</h2>
+
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Churn Class Distribution</h4>
+        <img src="{{ url_for('static', filename='images/eda_churn_distribution.png') }}" alt="Churn Distribution" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+EDA+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Shows class breakdown across the entire customer portfolio.</p>
+    </div>
+
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Churn Rate by Contract Type</h4>
+        <img src="{{ url_for('static', filename='images/eda_contract_churn.png') }}" alt="Contract Churn" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+EDA+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Month-to-month contracts have dramatically higher churn compared to 1 & 2-year contracts.</p>
+    </div>
+
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Churn Rate by Internet Service</h4>
+        <img src="{{ url_for('static', filename='images/eda_internet_churn.png') }}" alt="Internet Churn" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+EDA+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">Fiber Optic users experience higher churn due to premium pricing and tech support dependency.</p>
+    </div>
+
+    <div class="glass-card" style="padding: 1.25rem;">
+        <h4 style="font-size: 0.95rem; color: #fff; margin-bottom: 0.75rem; text-align: center;">Customer Tenure Distribution by Churn</h4>
+        <img src="{{ url_for('static', filename='images/eda_tenure_distribution.png') }}" alt="Tenure Distribution" style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" onerror="this.src='https://via.placeholder.com/400x300?text=Run+EDA+First'">
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.5rem; text-align: center;">New customers (0-12 months) represent the highest churn vulnerability period.</p>
+    </div>
+</div>
+{% endblock %}

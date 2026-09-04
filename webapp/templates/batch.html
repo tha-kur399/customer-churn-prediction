@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 class="page-title">Enterprise Batch Customer Scoring</h1>
+        <p class="page-subtitle">
+            Upload enterprise customer CSV files to run automated churn likelihood scoring, risk tier segmentation, and export annotated business sheets.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('sample_batch') }}" class="btn btn-secondary"><i class="fa-solid fa-download"></i> Download Sample CSV (25 Records)</a>
+    </div>
+</div>
+
+{% if error %}
+<div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 1rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+    <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+</div>
+{% endif %}
+
+<!-- Upload Box Card -->
+<div class="glass-card" style="margin-bottom: 2rem;">
+    <form action="{{ url_for('batch_predict') }}" method="POST" enctype="multipart/form-data">
+        <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 2.5rem; text-align: center; background: rgba(15, 23, 42, 0.4); transition: border-color 0.2s;" ondragover="this.style.borderColor='var(--accent-indigo)'" ondragleave="this.style.borderColor='var(--border-color)'">
+            <div style="width: 60px; height: 60px; margin: 0 auto 1rem; border-radius: 50%; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent-blue);">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.35rem;">Select or Drag & Drop Customer CSV File</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">Supports standard Telco schema with customer features</p>
+            
+            <input type="file" id="batchCsvFile" name="file" accept=".csv" required style="display: none;" onchange="updateFileLabel(this)">
+            
+            <div style="display: flex; justify-content: center; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('batchCsvFile').click()">
+                    <i class="fa-solid fa-folder-open"></i> Browse File
+                </button>
+                <span id="selectedFileName" style="color: var(--accent-blue); font-size: 0.9rem; font-weight: 600;">No file chosen</span>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-bolt"></i> Run Batch Inference
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if batch_summary %}
+<!-- Summary KPIs -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Total Processed</span>
+            <i class="fa-solid fa-users stat-icon"></i>
+        </div>
+        <div class="stat-value">{{ batch_summary.total_customers }}</div>
+        <div class="stat-desc">Customer accounts evaluated</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Predicted Churners</span>
+            <i class="fa-solid fa-user-xmark stat-icon" style="color: var(--danger);"></i>
+        </div>
+        <div class="stat-value" style="color: var(--danger);">{{ batch_summary.churn_count }}</div>
+        <div class="stat-desc">{{ batch_summary.churn_rate }}% of total portfolio</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Retained Customers</span>
+            <i class="fa-solid fa-user-check stat-icon" style="color: var(--success);"></i>
+        </div>
+        <div class="stat-value" style="color: var(--success);">{{ batch_summary.retained_count }}</div>
+        <div class="stat-desc">{{ 100.0 - batch_summary.churn_rate }}% retention rate</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">High / Critical Risk</span>
+            <i class="fa-solid fa-triangle-exclamation stat-icon" style="color: var(--warning);"></i>
+        </div>
+        <div class="stat-value" style="color: var(--warning);">{{ batch_summary.high_risk_count }}</div>
+        <div class="stat-desc">Require immediate intervention</div>
+    </div>
+</div>
+
+<!-- Scored Table Preview & Export Action -->
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 class="form-section-title" style="margin-bottom: 0.2rem; border-bottom: none;"><i class="fa-solid fa-table"></i> Scored Customer Preview (First 15 Rows)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Interactive view of processed customer predictions and risk tiers</p>
+        </div>
+        <a href="{{ url_for('download_batch') }}" class="btn btn-primary">
+            <i class="fa-solid fa-file-arrow-down"></i> Export Full Scored CSV
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Contract</th>
+                    <th>Tenure (Mo)</th>
+                    <th>Internet</th>
+                    <th>Monthly ($)</th>
+                    <th>Payment Method</th>
+                    <th>Prediction</th>
+                    <th>Churn Prob (%)</th>
+                    <th>Risk Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in batch_summary.sample_records %}
+                <tr>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent-blue);">{{ row.customerID if row.customerID else 'N/A' }}</td>
+                    <td>{{ row.Contract }}</td>
+                    <td>{{ row.tenure }}</td>
+                    <td>{{ row.InternetService }}</td>
+                    <td>${{ "%.2f"|format(row.MonthlyCharges) }}</td>
+                    <td>{{ row.PaymentMethod }}</td>
+                    <td>
+                        {% if row.Churn_Prediction == 'Churn' %}
+                            <span style="color: var(--danger); font-weight: 700;"><i class="fa-solid fa-xmark"></i> Churn</span>
+                        {% else %}
+                            <span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-check"></i> Retained</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-weight: 700;">{{ row['Churn_Probability_%'] }}%</td>
+                    <td>
+                        {% if row.Risk_Level == 'Critical' %}
+                            <span style="background: rgba(220, 38, 38, 0.2); color: #f87171; border: 1px solid rgba(220, 38, 38, 0.4); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">Critical</span>
+                        {% elif row.Risk_Level == 'High' %}
+                            <span style="background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">High</span>
+                        {% elif row.Risk_Level == 'Moderate' %}
+                            <span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">Moderate</span>
+                        {% else %}
+                            <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">Low</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function updateFileLabel(input) {
+    const label = document.getElementById('selectedFileName');
+    if (input.files && input.files.length > 0) {
+        label.textContent = input.files[0].name;
+    } else {
+        label.textContent = 'No file chosen';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 class="page-title">Customer Risk Assessment Engine</h1>
+        <p class="page-subtitle">
+            Enter customer profile parameters or use instant demo presets to evaluate churn probability and receive AI-driven retention advice.
+        </p>
+    </div>
+    <!-- Quick Preset Buttons for College Viva Demo -->
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Quick Demo Presets:</span>
+        <button type="button" class="preset-btn" onclick="applyPreset('high_risk')"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> High Risk Customer</button>
+        <button type="button" class="preset-btn" onclick="applyPreset('loyal')"><i class="fa-solid fa-shield-heart" style="color: var(--success);"></i> Loyal Safe Customer</button>
+        <button type="button" class="preset-btn" onclick="applyPreset('moderate')"><i class="fa-solid fa-scale-balanced" style="color: var(--warning);"></i> Moderate Customer</button>
+    </div>
+</div>
+
+{% if error %}
+<div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 1rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+    <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="grid-2">
+    <!-- Prediction Form -->
+    <div class="glass-card">
+        <form id="churnForm" method="POST" action="{{ url_for('predict') }}">
+            <!-- Demographics Section -->
+            <div class="form-section-title">
+                <i class="fa-solid fa-user"></i> 1. Customer Demographics
+            </div>
+            <div class="grid-2" style="gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="gender">Gender</label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="Male" {% if form_data and form_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if form_data and form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="SeniorCitizen">Senior Citizen</label>
+                    <select class="form-select" id="SeniorCitizen" name="SeniorCitizen">
+                        <option value="0" {% if form_data and form_data.SeniorCitizen == '0' %}selected{% endif %}>No (Under 65)</option>
+                        <option value="1" {% if form_data and form_data.SeniorCitizen == '1' %}selected{% endif %}>Yes (65+)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="Partner">Has Partner / Spouse</label>
+                    <select class="form-select" id="Partner" name="Partner">
+                        <option value="No" {% if form_data and form_data.Partner == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.Partner == 'Yes' %}selected{% endif %}>Yes</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="Dependents">Has Dependents / Children</label>
+                    <select class="form-select" id="Dependents" name="Dependents">
+                        <option value="No" {% if form_data and form_data.Dependents == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.Dependents == 'Yes' %}selected{% endif %}>Yes</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Subscribed Services Section -->
+            <div class="form-section-title" style="margin-top: 1rem;">
+                <i class="fa-solid fa-wifi"></i> 2. Subscribed Services
+            </div>
+            <div class="grid-2" style="gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="PhoneService">Phone Service</label>
+                    <select class="form-select" id="PhoneService" name="PhoneService">
+                        <option value="Yes" {% if form_data and form_data.PhoneService == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No" {% if form_data and form_data.PhoneService == 'No' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="MultipleLines">Multiple Lines</label>
+                    <select class="form-select" id="MultipleLines" name="MultipleLines">
+                        <option value="No" {% if form_data and form_data.MultipleLines == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.MultipleLines == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No phone service" {% if form_data and form_data.MultipleLines == 'No phone service' %}selected{% endif %}>No phone service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="InternetService">Internet Service Type</label>
+                    <select class="form-select" id="InternetService" name="InternetService">
+                        <option value="Fiber optic" {% if form_data and form_data.InternetService == 'Fiber optic' %}selected{% endif %}>Fiber optic (High Speed)</option>
+                        <option value="DSL" {% if form_data and form_data.InternetService == 'DSL' %}selected{% endif %}>DSL</option>
+                        <option value="No" {% if form_data and form_data.InternetService == 'No' %}selected{% endif %}>No Internet</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="OnlineSecurity">Online Security</label>
+                    <select class="form-select" id="OnlineSecurity" name="OnlineSecurity">
+                        <option value="No" {% if form_data and form_data.OnlineSecurity == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.OnlineSecurity == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.OnlineSecurity == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="OnlineBackup">Online Cloud Backup</label>
+                    <select class="form-select" id="OnlineBackup" name="OnlineBackup">
+                        <option value="No" {% if form_data and form_data.OnlineBackup == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.OnlineBackup == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.OnlineBackup == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="DeviceProtection">Device Protection Plan</label>
+                    <select class="form-select" id="DeviceProtection" name="DeviceProtection">
+                        <option value="No" {% if form_data and form_data.DeviceProtection == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.DeviceProtection == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.DeviceProtection == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="TechSupport">24/7 Tech Support</label>
+                    <select class="form-select" id="TechSupport" name="TechSupport">
+                        <option value="No" {% if form_data and form_data.TechSupport == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.TechSupport == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.TechSupport == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="StreamingTV">Streaming TV</label>
+                    <select class="form-select" id="StreamingTV" name="StreamingTV">
+                        <option value="No" {% if form_data and form_data.StreamingTV == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.StreamingTV == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.StreamingTV == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="StreamingMovies">Streaming Movies</label>
+                    <select class="form-select" id="StreamingMovies" name="StreamingMovies">
+                        <option value="No" {% if form_data and form_data.StreamingMovies == 'No' %}selected{% endif %}>No</option>
+                        <option value="Yes" {% if form_data and form_data.StreamingMovies == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No internet service" {% if form_data and form_data.StreamingMovies == 'No internet service' %}selected{% endif %}>No internet service</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contract & Billing Section -->
+            <div class="form-section-title" style="margin-top: 1rem;">
+                <i class="fa-solid fa-file-invoice-dollar"></i> 3. Account & Billing Profile
+            </div>
+            <div class="grid-2" style="gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="Contract">Contract Type</label>
+                    <select class="form-select" id="Contract" name="Contract">
+                        <option value="Month-to-month" {% if form_data and form_data.Contract == 'Month-to-month' %}selected{% endif %}>Month-to-month</option>
+                        <option value="One year" {% if form_data and form_data.Contract == 'One year' %}selected{% endif %}>One year</option>
+                        <option value="Two year" {% if form_data and form_data.Contract == 'Two year' %}selected{% endif %}>Two year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="PaperlessBilling">Paperless Billing</label>
+                    <select class="form-select" id="PaperlessBilling" name="PaperlessBilling">
+                        <option value="Yes" {% if form_data and form_data.PaperlessBilling == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No" {% if form_data and form_data.PaperlessBilling == 'No' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" for="PaymentMethod">Payment Method</label>
+                    <select class="form-select" id="PaymentMethod" name="PaymentMethod">
+                        <option value="Electronic check" {% if form_data and form_data.PaymentMethod == 'Electronic check' %}selected{% endif %}>Electronic check</option>
+                        <option value="Mailed check" {% if form_data and form_data.PaymentMethod == 'Mailed check' %}selected{% endif %}>Mailed check</option>
+                        <option value="Bank transfer (automatic)" {% if form_data and form_data.PaymentMethod == 'Bank transfer (automatic)' %}selected{% endif %}>Bank transfer (automatic)</option>
+                        <option value="Credit card (automatic)" {% if form_data and form_data.PaymentMethod == 'Credit card (automatic)' %}selected{% endif %}>Credit card (automatic)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="tenure">Tenure (Months with Company)</label>
+                    <input type="number" step="1" min="1" max="72" class="form-control" id="tenure" name="tenure" value="{{ form_data.tenure if form_data else '6' }}" required oninput="updateTotalChargesAuto()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="MonthlyCharges">Monthly Charges ($)</label>
+                    <input type="number" step="0.05" min="18" max="150" class="form-control" id="MonthlyCharges" name="MonthlyCharges" value="{{ form_data.MonthlyCharges if form_data else '79.50' }}" required oninput="updateTotalChargesAuto()">
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label" for="TotalCharges">Total Lifetime Charges ($)</label>
+                    <input type="number" step="0.05" min="18" max="10000" class="form-control" id="TotalCharges" name="TotalCharges" value="{{ form_data.TotalCharges if form_data else '477.00' }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; font-size: 1.05rem; padding: 0.9rem;">
+                <i class="fa-solid fa-brain"></i> Compute Churn Risk & Generate Action Plan
+            </button>
+        </form>
+    </div>
+
+    <!-- Prediction Results / Right Panel -->
+    <div>
+        {% if result %}
+            <div class="result-card {% if result.churn_probability >= 50 %}critical{% else %}safe{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">AI Risk Outcome</span>
+                        <h2 style="font-size: 1.5rem; font-weight: 800; color: #fff; margin-top: 0.2rem;">{{ result.label }}</h2>
+                    </div>
+                    <span class="risk-badge" style="background: {{ result.risk_color }}22; border: 1px solid {{ result.risk_color }}; color: {{ result.risk_color }};">
+                        {{ result.risk_level }}
+                    </span>
+                </div>
+
+                <!-- Animated Risk Gauge -->
+                <div class="risk-gauge-container">
+                    <div class="risk-circle" style="border-color: {{ result.risk_color }}; box-shadow: 0 0 25px {{ result.risk_color }}44;">
+                        <span class="risk-circle-percent" style="color: {{ result.risk_color }};">{{ result.churn_probability }}%</span>
+                        <span class="risk-circle-sub">Churn Risk</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Customer Retention Likelihood: <strong style="color: var(--success);">{{ result.retention_probability }}%</strong>
+                    </p>
+                </div>
+
+                <!-- Contributing Risk Drivers -->
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Primary Churn Driver Factors:
+                    </h4>
+                    <ul class="risk-factors-list">
+                        {% for factor in result.top_risk_factors %}
+                            <li class="risk-item">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>{{ factor }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Prescriptive Retention Actions -->
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-lightbulb" style="color: var(--accent-blue);"></i> Recommended Retention Actions:
+                    </h4>
+                    <ul class="recommendations-list">
+                        {% for rec in result.retention_recommendations %}
+                            <li class="rec-item">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span>{{ rec }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% else %}
+            <!-- Default Placeholder State -->
+            <div class="glass-card" style="text-align: center; padding: 4rem 2rem;">
+                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; border-radius: 50%; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--accent-indigo);">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <h3 style="color: #fff; font-size: 1.35rem; margin-bottom: 0.5rem;">Awaiting Customer Profile</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; max-width: 400px; margin: 0 auto 1.5rem; line-height: 1.6;">
+                    Fill in the form on the left or click any of the <strong>Quick Demo Presets</strong> above to compute churn risk.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <button type="button" class="preset-btn" onclick="applyPreset('high_risk')"><i class="fa-solid fa-play"></i> Test High Risk</button>
+                    <button type="button" class="preset-btn" onclick="applyPreset('loyal')"><i class="fa-solid fa-play"></i> Test Loyal Safe</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

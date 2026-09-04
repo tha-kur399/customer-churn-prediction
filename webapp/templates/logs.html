@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 class="page-title">Real-Time System & Pipeline Logs</h1>
+        <p class="page-subtitle">
+            Live execution activity, data transformation stages, model training runs, and inference logs recorded by the custom logging module.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <button type="button" class="btn btn-secondary" onclick="fetchLiveLogs()"><i class="fa-solid fa-arrows-rotate"></i> Refresh Logs</button>
+        <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-muted);">
+            <input type="checkbox" id="autoRefreshCheckbox" checked onchange="toggleAutoRefresh(this)">
+            <label for="autoRefreshCheckbox">Auto Refresh (3s)</label>
+        </div>
+    </div>
+</div>
+
+<!-- Terminal Log Window -->
+<div class="terminal-window">
+    <div class="terminal-header">
+        <div class="terminal-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+        </div>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-file-lines"></i> logs/churn_system.log</span>
+        <span id="logCountBadge" style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.2); color: var(--accent-blue); padding: 0.2rem 0.5rem; border-radius: var(--radius-full);">Live Stream</span>
+    </div>
+    
+    <div class="terminal-body" id="logTerminalBody">
+        {% for line in log_lines %}
+            <div class="log-entry {% if 'ERROR' in line %}log-error{% elif 'WARN' in line %}log-warn{% else %}log-info{% endif %}">
+                {{ line.strip() }}
+            </div>
+        {% else %}
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                No system log records found yet. Trigger a prediction or pipeline run to see live logs.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+let autoRefreshTimer = null;
+
+function fetchLiveLogs() {
+    fetch('/api/logs')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const terminal = document.getElementById('logTerminalBody');
+                terminal.innerHTML = '';
+                const lines = data.logs.slice().reverse();
+                lines.forEach(line => {
+                    const entry = document.createElement('div');
+                    entry.className = 'log-entry ' + (line.includes('ERROR') ? 'log-error' : line.includes('WARN') ? 'log-warn' : 'log-info');
+                    entry.textContent = line.trim();
+                    terminal.appendChild(entry);
+                });
+            }
+        })
+        .catch(err => console.error('Error fetching logs:', err));
+}
+
+function toggleAutoRefresh(cb) {
+    if (cb.checked) {
+        autoRefreshTimer = setInterval(fetchLiveLogs, 3000);
+    } else {
+        clearInterval(autoRefreshTimer);
+    }
+}
+
+// Start auto-refresh by default
+document.addEventListener('DOMContentLoaded', () => {
+    autoRefreshTimer = setInterval(fetchLiveLogs, 3000);
+});
+</script>
+{% endblock %}

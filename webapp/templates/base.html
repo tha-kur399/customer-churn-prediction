@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Customer Churn Prediction System | MCA Data Science{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <span>ChurnSense<span class="badge-mca">MCA DS AI</span></span>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fa-solid fa-house"></i> Overview</a></li>
+                <li><a href="{{ url_for('predict') }}" class="nav-link {% if request.endpoint == 'predict' %}active{% endif %}"><i class="fa-solid fa-user-shield"></i> Risk Assessment</a></li>
+                <li><a href="{{ url_for('batch_predict') }}" class="nav-link {% if request.endpoint == 'batch_predict' %}active{% endif %}"><i class="fa-solid fa-file-csv"></i> Batch Evaluation</a></li>
+                <li><a href="{{ url_for('insights') }}" class="nav-link {% if request.endpoint == 'insights' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Analytics & Insights</a></li>
+                <li><a href="{{ url_for('logs') }}" class="nav-link {% if request.endpoint == 'logs' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> Live Logs</a></li>
+            </ul>
+
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                <span>Pipeline Active</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2026 <strong>Customer Churn Prediction & Retention System</strong> | MCA 3rd Semester Project (Data Science Specialization)</p>
+        <p style="margin-top: 0.35rem; color: var(--text-muted); font-size: 0.78rem;">Built with Scikit-Learn, Pandas, NumPy, Flask & Python Logging Pipeline</p>
+    </footer>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[2026-09-04 10:22:58] INFO | Line: 48 | Module: predict_pipeline.predict() -> Starting inference pipeline execution.
+[2026-09-04 10:22:59] INFO | Line: 60 | Module: utils.load_object() -> Successfully loaded object from: artifacts\preprocessor.joblib
+[2026-09-04 10:22:59] INFO | Line: 60 | Module: utils.load_object() -> Successfully loaded object from: artifacts\model.joblib
+[2026-09-04 10:22:59] INFO | Line: 59 | Module: predict_pipeline.predict() -> Applying preprocessor transformation to input sample.
+[2026-09-04 10:23:00] INFO | Line: 137 | Module: predict_pipeline.predict() -> Inference result -> Churn Prob: 99.11% | Risk Tier: Critical Risk
+[2026-09-04 10:23:00] INFO | Line: 48 | Module: predict_pipeline.predict() -> Starting inference pipeline execution.
+[2026-09-04 10:23:00] INFO | Line: 60 | Module: utils.load_object() -> Successfully loaded object from: artifacts\preprocessor.joblib
+[2026-09-04 10:23:00] INFO | Line: 60 | Module: utils.load_object() -> Successfully loaded object from: artifacts\model.joblib
+[2026-09-04 10:23:00] INFO | Line: 59 | Module: predict_pipeline.predict() -> Applying preprocessor transformation to input sample.
+[2026-09-04 10:23:00] INFO | Line: 137 | Module: predict_pipeline.predict() -> Inference result -> Churn Prob: 4.16% | Risk Tier: Low Risk
+[2026-09-04 10:30:26] INFO | Line: 273 | Module: app.<module>() -> Starting Flask Web Application on http://127.0.0.1:5000
+[2026-09-04 10:30:26] INFO | Line: 97 | Module: _internal._log() -> [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.31.92:5000
+[2026-09-04 10:30:26] INFO | Line: 97 | Module: _internal._log() -> [33mPress CTRL+C to quit[0m
+[2026-09-04 10:30:26] INFO | Line: 97 | Module: _internal._log() ->  * Restarting with stat
+[2026-09-04 10:30:28] INFO | Line: 273 | Module: app.<module>() -> Starting Flask Web Application on http://127.0.0.1:5000
+[2026-09-04 10:30:28] WARNING | Line: 97 | Module: _internal._log() ->  * Debugger is active!
+[2026-09-04 10:30:28] INFO | Line: 97 | Module: _internal._log() ->  * Debugger PIN: 304-854-826
+[2026-09-04 10:30:28] INFO | Line: 97 | Module: _internal._log() -> 127.0.0.1 - - [04/Sep/2026 10:30:28] "GET / HTTP/1.1" 200 -
+[2026-09-04 10:30:28] INFO | Line: 97 | Module: _internal._log() -> 127.0.0.1 - - [04/Sep/2026 10:30:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+[2026-09-04 10:30:28] INFO | Line: 97 | Module: _internal._log() -> 127.0.0.1 - - [04/Sep/2026 10:30:28] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+[2026-09-04 10:30:29] INFO | Line: 97 | Module: _internal._log() -> 127.0.0.1 - - [04/Sep/2026 10:30:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -

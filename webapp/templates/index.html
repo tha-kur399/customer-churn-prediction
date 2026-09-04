@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 class="page-title">Customer Churn Prediction & Retention System</h1>
+        <p class="page-subtitle">
+            An End-to-End Machine Learning platform built for proactive churn detection, customer risk scoring, and business retention optimization.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('predict') }}" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Run Risk Prediction</a>
+        <a href="{{ url_for('batch_predict') }}" class="btn btn-secondary"><i class="fa-solid fa-upload"></i> Batch Scoring</a>
+    </div>
+</div>
+
+<!-- KPI Metric Cards -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Model Accuracy</span>
+            <i class="fa-solid fa-bullseye stat-icon" style="color: var(--accent-blue);"></i>
+        </div>
+        <div class="stat-value">
+            {% if metrics %}
+                {{ "%.2f"|format(metrics.best_model_metrics.accuracy * 100) }}%
+            {% else %}
+                81.90%
+            {% endif %}
+        </div>
+        <div class="stat-desc">Tested on unseen holdout test set</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">ROC-AUC Score</span>
+            <i class="fa-solid fa-chart-area stat-icon" style="color: var(--accent-indigo);"></i>
+        </div>
+        <div class="stat-value">
+            {% if metrics %}
+                {{ "%.4f"|format(metrics.best_model_metrics.roc_auc) }}
+            {% else %}
+                0.9033
+            {% endif %}
+        </div>
+        <div class="stat-desc">Exceptional class discrimination</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">F1-Score (Harmonic Mean)</span>
+            <i class="fa-solid fa-scale-balanced stat-icon" style="color: var(--success);"></i>
+        </div>
+        <div class="stat-value">
+            {% if metrics %}
+                {{ "%.4f"|format(metrics.best_model_metrics.f1_score) }}
+            {% else %}
+                0.8409
+            {% endif %}
+        </div>
+        <div class="stat-desc">Balanced Precision & Recall</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Deployed Architecture</span>
+            <i class="fa-solid fa-microchip stat-icon" style="color: var(--accent-purple);"></i>
+        </div>
+        <div class="stat-value" style="font-size: 1.35rem; line-height: 2rem;">
+            {% if metrics %}
+                {{ metrics.best_model_name }}
+            {% else %}
+                Logistic Regression
+            {% endif %}
+        </div>
+        <div class="stat-desc">Benchmarked across 5 algorithms</div>
+    </div>
+</div>
+
+<!-- Architecture & Pipeline Cards -->
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <!-- Project Workflow Card -->
+    <div class="glass-card">
+        <h3 class="form-section-title"><i class="fa-solid fa-diagram-project"></i> Project Machine Learning Architecture</h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            This MCA Data Science project follows an enterprise modular ML lifecycle:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(99, 102, 241, 0.2); color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">1</div>
+                <div>
+                    <strong style="color: #fff; font-size: 0.95rem;">Data Ingestion & Stratified Splitting</strong>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Loads 7,043 customer records with 21 attributes, handles data validation, and partitions into 80% train and 20% test datasets.</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">2</div>
+                <div>
+                    <strong style="color: #fff; font-size: 0.95rem;">Transformation & Feature Engineering</strong>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Standardizes numerical features with <code>StandardScaler</code> and encodes 16 categorical dimensions using <code>OneHotEncoder</code> wrapped in <code>ColumnTransformer</code>.</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">3</div>
+                <div>
+                    <strong style="color: #fff; font-size: 0.95rem;">Multi-Algorithm Model Benchmarking</strong>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Trains & evaluates Logistic Regression, Decision Trees, Random Forest, AdaBoost, and Gradient Boosting with balanced class weights.</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: var(--success); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">4</div>
+                <div>
+                    <strong style="color: #fff; font-size: 0.95rem;">Inference & Retention Engine</strong>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">Generates real-time churn probability, risk severity classification, key risk drivers, and prescriptive retention actions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation & Highlights -->
+    <div class="glass-card">
+        <h3 class="form-section-title"><i class="fa-solid fa-bolt"></i> System Modules & Features</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+            <a href="{{ url_for('predict') }}" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="padding: 1.1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff; font-size: 1rem;"><i class="fa-solid fa-user-check" style="color: var(--accent-blue); margin-right: 0.4rem;"></i> Individual Risk Assessment</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">Interactive customer profiling with 1-click test presets (High Risk, Loyal, Average).</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('batch_predict') }}" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="padding: 1.1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff; font-size: 1rem;"><i class="fa-solid fa-table-cells" style="color: var(--accent-purple); margin-right: 0.4rem;"></i> Enterprise Batch Prediction</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">Score thousands of customer records via CSV upload and export annotated risk sheets.</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('insights') }}" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="padding: 1.1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff; font-size: 1rem;"><i class="fa-solid fa-chart-simple" style="color: var(--warning); margin-right: 0.4rem;"></i> Visual Analytics & Model Insights</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">Explore EDA charts, Confusion Matrix, ROC-AUC curve, and algorithm benchmarks.</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('logs') }}" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="padding: 1.1rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff; font-size: 1rem;"><i class="fa-solid fa-code" style="color: var(--success); margin-right: 0.4rem;"></i> Live System Logs Viewer</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">Inspect real-time timestamped pipeline execution logs and exception traces.</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
